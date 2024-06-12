@@ -4,7 +4,6 @@ import { useUser } from "../../hooks/useUser";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-//import { supabase } from "@/lib/supabase";
 import { getQuizzesData } from "@/lib/fetching";
 
 interface QuizData {
@@ -19,12 +18,21 @@ export default function Home() {
   const { user } = useUser();
 
   const [data, setData] = useState<QuizData[]>([]);
+  const [filteredData, setFilteredData] = useState<QuizData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const quizData = await getQuizzesData();
         setData(quizData);
+
+        // Apply filtering logic here
+        const filteredQuizzes = quizData.filter((quiz) => {
+          // Example criteria: only show quizzes with descriptions containing 'AI' or 'Science'
+          return quiz.description.includes("psychiczne") || quiz.description.includes("depresja");
+        });
+
+        setFilteredData(filteredQuizzes);
       } catch (error) {
         console.error("Błąd pobierania danych", error);
       }
@@ -46,7 +54,7 @@ export default function Home() {
     <div className="bg-gray-100 dark:bg-gray-900 flex justify-center">
       <main className="max-w-8xl mx-auto p-7">
         <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ">
-          {data
+          {filteredData
             .sort((a, b) =>
               a.description === "AI" ? -1 : b.description === "AI" ? 1 : 0
             )
@@ -62,7 +70,9 @@ export default function Home() {
                     className="w-120 mx-auto rounded-2xl"
                   />
                 </a>
-                <p className="mt-1 text-center font-serif font-semibold ">{quiz.title}</p>
+                <p className="mt-1 text-center font-serif font-semibold ">
+                  {quiz.title}
+                </p>
               </div>
             ))}
         </section>
