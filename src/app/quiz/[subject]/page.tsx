@@ -65,10 +65,8 @@ export default function Home() {
       <div className="flex flex-col">
         <div className="flex flex-col">
           {[
-            { text: "Graj sam!", path: sologame },
-            { text: "Wyzwij znajomego!", path: "/wyzywaj" },
-            { text: "Wybierz inny Quiz!", path: "/" },
-            { text: "Dodaj pytanie do tego Quizu!", path: addquestion },
+            { text: "Wypełnij Test!", path: sologame },
+            { text: "Wybierz inny Test!", path: "/" },
           ].map((item, index) => (
             <Button
               onClick={() => handleButtonClick(item.path)}

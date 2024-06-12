@@ -52,8 +52,8 @@ export default function Home() {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 flex justify-center">
-      <main className="max-w-8xl mx-auto p-7">
-        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ">
+      <main className="max-w-6xl mx-auto p-7">
+        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 justify-items-center">
           {filteredData
             .sort((a, b) =>
               a.description === "AI" ? -1 : b.description === "AI" ? 1 : 0
@@ -61,8 +61,7 @@ export default function Home() {
             .map((quiz: QuizData) => (
               <div
                 key={quiz.title}
-                className="bg-zinc-50 dark:bg-gray-900 p-4 pb-1 rounded-2xl shadow-md border border-gray-200"
-              >
+                className="bg-zinc-50 dark:bg-gray-900 p-4 pb-1 rounded-2xl shadow-md border border-gray-200">
                 <a onClick={() => handleImageClick(quiz.description)}>
                   <img
                     src={quiz.logo}
@@ -70,7 +69,7 @@ export default function Home() {
                     className="w-120 mx-auto rounded-2xl"
                   />
                 </a>
-                <p className="mt-1 text-center font-serif font-semibold ">
+                <p className="mt-1 text-center font-serif font-semibold">
                   {quiz.title}
                 </p>
               </div>
@@ -79,4 +78,5 @@ export default function Home() {
       </main>
     </div>
   );
+
 }

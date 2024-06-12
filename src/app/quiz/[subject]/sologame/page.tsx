@@ -19,7 +19,7 @@ interface Question {
   question_text: string | null;
   content: string | null;
   correct_answer: string;
-  options: any[] | null;
+  options: string[] | null;
 }
 
 const QuizPage: NextPage = () => {
@@ -118,7 +118,7 @@ const QuizPage: NextPage = () => {
               )}
 
               <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                {currentQuestion.options.map((option: any, index: number) => (
+                {(currentQuestion.options || []).map((option: any, index: number) => (
                   <li
                     key={index}
                     onClick={() => handleSelectAnswer(option)}
@@ -159,7 +159,12 @@ const QuizPage: NextPage = () => {
     );
   };
 
-  const decisionTree = {
+  interface DecisionTreeNode {
+    question: string;
+    options: { [key: string]: DecisionTreeNode | string };
+  }
+
+  const decisionTree: DecisionTreeNode = {
     question: "lęk",
     options: {
       T: {
@@ -281,22 +286,26 @@ const QuizPage: NextPage = () => {
     },
   };
 
-  const traverseDecisionTree = (answers) => {
-    let node = decisionTree;
-    const path = [];
-    for (const answer of answers) {
+  const traverseDecisionTree = (answers: string[]) => {
+    let node: DecisionTreeNode = decisionTree;
+    const path = [node.question];
+    for (let i = 0; i < answers.length; i++) {
+      const answer = answers[i];
       if (node.options && node.options[answer]) {
-        node = node.options[answer];
-        path.push(node.question || node);
+        node = node.options[answer] as DecisionTreeNode;
+        path.push(node.question);
         if (typeof node === "string") {
+          path.push(node); // Add the final result to the path
           return { result: node, path }; // Final diagnosis
         }
       } else {
         return { result: "Invalid answer path", path }; // If the path is invalid
       }
     }
-    return { result: "Incomplete answers", path }; // If the answers don't lead to a final diagnosis
+    return { result: node.question, path }; // Return the last node as the result
   };
+
+
 
   return (
     <div>
