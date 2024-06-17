@@ -5,14 +5,32 @@ import { supabase } from "@/lib/supabase";
 import { useUser } from "@/../hooks/useUser";
 import Button from "@/components/Button";
 
+interface User {
+  id: string;
+  username: string;
+  role: string;
+}
+
+interface CompletedTest {
+  id: number;
+  user_id: string;
+  test_type: string;
+  illness: string | null;
+  depression_score: number | null;
+  user_answers: Record<string, any>;
+  created_at: string;
+}
+
 function UsernameCheck() {
-  const [username, setUsername] = useState("");
-  const [isUsernameMissing, setIsUsernameMissing] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [username, setUsername] = useState<string>("");
+  const [isUsernameMissing, setIsUsernameMissing] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
   const { user } = useUser();
 
   useEffect(() => {
-    checkUsername();
+    if (user) {
+      checkUsername();
+    }
   }, [user]);
 
   async function checkUsername() {
@@ -86,35 +104,23 @@ function UsernameCheck() {
   );
 }
 
-interface CompletedTest {
-  id: number;
-  user_id: string;
-  test_type: string;
-  illness: string | null;
-  depression_score: number | null;
-  user_answers: Record<string, any>;
-  created_at: string;
-}
-
-function CompletedTestsList() {
-  const { user } = useUser();
+function CompletedTestsList({ userId }: { userId: string }) {
   const [completedTests, setCompletedTests] = useState<CompletedTest[]>([]);
   const [expandedTestId, setExpandedTestId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (userId) {
       fetchCompletedTests();
     }
-  }, [user]);
+  }, [userId]);
 
   async function fetchCompletedTests() {
     try {
       const { data, error } = await supabase
         .from("completed_tests")
         .select("*")
-        .eq("user_id", user?.id)
+        .eq("user_id", userId)
         .order("created_at", { ascending: false });
-
 
       if (error) {
         throw error;
@@ -132,7 +138,7 @@ function CompletedTestsList() {
 
   return (
     <div className="max-w-4xl mx-auto p-8">
-      <h2 className="text-2xl font-bold mb-4">Twoje zakończone testy</h2>
+      <h2 className="text-2xl font-bold mb-4">Zakończone testy użytkownika</h2>
       {completedTests.map((test) => (
         <div
           key={test.id}
@@ -172,14 +178,82 @@ function CompletedTestsList() {
   );
 }
 
+function AdminUserList() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  async function fetchUsers() {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, username, role")
+        .in("role", ["user", "admin"]);
+      if (error) {
+        throw error;
+      }
+
+      setUsers(data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-8">
+      <h2 className="text-2xl font-bold mb-4">Lista użytkowników</h2>
+      <div className="mb-8">
+        {users.map((user) => (
+          <div
+            key={user.id}
+            className="mb-2 p-2 border rounded-lg bg-white shadow-sm cursor-pointer"
+            onClick={() => setSelectedUserId(user.id)}
+          >
+            {user.username || "Brak nicku"}
+          </div>
+        ))}
+      </div>
+      {selectedUserId && <CompletedTestsList userId={selectedUserId} />}
+    </div>
+  );
+}
+
 export default function Home() {
   useUserAuth();
   const { user } = useUser();
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (user) {
+      checkAdminRole();
+    }
+  }, [user]);
+
+  async function checkAdminRole() {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setIsAdmin(data.role === "admin");
+    } catch (error) {
+      console.error("Error checking admin role:", error);
+    }
+  }
 
   return (
     <div>
       <UsernameCheck />
-      {user && <CompletedTestsList />}
+      {user && (isAdmin ? <AdminUserList /> : <CompletedTestsList userId={user.id} />)}
     </div>
   );
 }

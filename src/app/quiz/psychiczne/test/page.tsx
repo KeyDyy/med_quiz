@@ -147,10 +147,10 @@ const QuizPage: NextPage = () => {
                         <div>Loading...</div>
                     )}
                 </div>
-                <div className="mt-4">
+                {/* <div className="mt-4">
                     <h3 className="text-lg font-bold">Aktualna gałąź drzewa decyzyjnego:</h3>
                     <p>{currentDecisionPath.join(" -> ")}</p>
-                </div>
+                </div> */}
             </div>
         </div>
     );
@@ -199,116 +199,116 @@ const QuizPage: NextPage = () => {
     }
 
     const decisionTree: DecisionTreeNode = {
-        question: "lęk",
+        question: "Czy odczuwasz lęk?",
         options: {
-            T: {
-                question: "nastrój obniżony",
+            Tak: {
+                question: "Czy masz obniżony nastrój?",
                 options: {
-                    T: {
-                        question: "nasilony smutek, przygnębienie",
+                    Tak: {
+                        question: "Czy odczuwasz nasilony smutek lub przygnębienie?",
                         options: {
-                            T: {
-                                question: "raz smutek, przygnębienie…",
+                            Tak: {
+                                question: "Czy odczuwasz raz smutek, raz przygnębienie?",
                                 options: {
-                                    T: "Epizod depresji",
-                                    N: "Depresja",
+                                    Tak: "Diagnoza: Epizod depresji",
+                                    Nie: "Diagnoza: Depresja",
                                 },
                             },
-                            N: "Inne zaburzenia lękowe",
+                            Nie: "Diagnoza: Inne zaburzenia lękowe",
                         },
                     },
-                    N: {
-                        question: "nasilony lęk i brak poczucia bezpieczeństwa",
+                    Nie: {
+                        question: "Czy odczuwasz nasilony lęk i brak poczucia bezpieczeństwa?",
                         options: {
-                            T: {
-                                question: "lęk przed przebywaniem na otwartej przestrzeni, np. kościół, sklep, tłum",
+                            Tak: {
+                                question: "Czy masz lęk przed przebywaniem na otwartej przestrzeni, np. w kościele, sklepie, tłumie?",
                                 options: {
-                                    T: "Agorafobia",
-                                    N: {
-                                        question: "lęk przed wystąpieniem publicznym, kompromitacją",
+                                    Tak: "Diagnoza: Agorafobia",
+                                    Nie: {
+                                        question: "Czy masz lęk przed wystąpieniem publicznym, kompromitacją?",
                                         options: {
-                                            T: "Fobia społeczna",
-                                            N: {
-                                                question: "lęk przed przytyciem",
+                                            Tak: "Diagnoza: Fobia społeczna",
+                                            Nie: {
+                                                question: "Czy masz lęk przed przytyciem?",
                                                 options: {
-                                                    T: {
-                                                        question: "głodzenie się i intensywne ćwiczenia",
+                                                    Tak: {
+                                                        question: "Czy głodzisz się i intensywnie ćwiczysz?",
                                                         options: {
-                                                            T: "Anoreksja",
-                                                            N: {
-                                                                question: "objadanie się i prowokowanie wymiotów",
+                                                            Tak: "Diagnoza: Anoreksja",
+                                                            Nie: {
+                                                                question: "Czy objadasz się i prowokujesz wymioty?",
                                                                 options: {
-                                                                    T: "Bulimia",
-                                                                    N: "Inne zaburzenia psychiczne",
+                                                                    Tak: "Diagnoza: Bulimia",
+                                                                    Nie: "Diagnoza: Inne zaburzenia psychiczne",
                                                                 },
                                                             },
                                                         },
                                                     },
-                                                    N: "Inne zaburzenia lękowe",
+                                                    Nie: "Diagnoza: Inne zaburzenia lękowe",
                                                 },
                                             },
                                         },
                                     },
                                 },
                             },
-                            N: "Inne zaburzenia lękowe",
+                            Nie: "Diagnoza: Inne zaburzenia lękowe",
                         },
                     },
                 },
             },
-            N: {
-                question: "euforia, radość",
+            Nie: {
+                question: "Czy odczuwasz euforię lub radość?",
                 options: {
-                    T: {
-                        question: "smutek, przygnębienie",
+                    Tak: {
+                        question: "Czy odczuwasz smutek lub przygnębienie?",
                         options: {
-                            T: "Zespół maniakalny",
-                            N: "Zaburzenia schizoafektywne",
+                            Tak: "Diagnoza: Zespół maniakalny",
+                            Nie: "Diagnoza: Zaburzenia schizoafektywne",
                         },
                     },
-                    N: {
-                        question: "agresja",
+                    Nie: {
+                        question: "Czy odczuwasz agresję?",
                         options: {
-                            T: {
-                                question: "omamy, urojenia",
+                            Tak: {
+                                question: "Czy masz omamy lub urojenia?",
                                 options: {
-                                    T: "Schizofrenia paranoidalna",
-                                    N: "Nadmierna agresja",
+                                    Tak: "Diagnoza: Schizofrenia paranoidalna",
+                                    Nie: "Diagnoza: Nadmierna agresja",
                                 },
                             },
-                            N: {
-                                question: "sztywność mięśniowa",
+                            Nie: {
+                                question: "Czy odczuwasz sztywność mięśniową?",
                                 options: {
-                                    T: {
-                                        question: "osłupienie",
+                                    Tak: {
+                                        question: "Czy doświadczasz osłupienia?",
                                         options: {
-                                            T: "Schizofrenia katatoniczna",
-                                            N: "Inne zaburzenia psychiczne",
+                                            Tak: "Diagnoza: Schizofrenia katatoniczna",
+                                            Nie: "Diagnoza: Inne zaburzenia psychiczne",
                                         },
                                     },
-                                    N: {
-                                        question: "ograniczona aktywność",
+                                    Nie: {
+                                        question: "Czy masz ograniczoną aktywność?",
                                         options: {
-                                            T: {
-                                                question: "ilość treści wypowiedzi",
+                                            Tak: {
+                                                question: "Czy ilość treści Twoich wypowiedzi jest ograniczona?",
                                                 options: {
-                                                    T: "Schizofrenia rezydualna",
-                                                    N: {
-                                                        question: "izolacja od otoczenia",
+                                                    Tak: "Diagnoza: Schizofrenia rezydualna",
+                                                    Nie: {
+                                                        question: "Czy izolujesz się od otoczenia?",
                                                         options: {
-                                                            T: "Inne zaburzenia psychiczne",
-                                                            N: {
-                                                                question: "wycofanie społeczne",
+                                                            Tak: "Diagnoza: Inne zaburzenia psychiczne",
+                                                            Nie: {
+                                                                question: "Czy wycofujesz się społecznie?",
                                                                 options: {
-                                                                    T: "Schizofrenia prosta",
-                                                                    N: "Inne zaburzenia psychiczne",
+                                                                    Tak: "Diagnoza: Schizofrenia prosta",
+                                                                    Nie: "Diagnoza: Inne zaburzenia psychiczne",
                                                                 },
                                                             },
                                                         },
                                                     },
                                                 },
                                             },
-                                            N: "Zdrowy",
+                                            Nie: "Diagnoza: Zdrowy",
                                         },
                                     },
                                 },
@@ -319,6 +319,7 @@ const QuizPage: NextPage = () => {
             },
         },
     };
+
 
     const traverseDecisionTree = (answers: string[], questions: Question[]) => {
         let node: DecisionTreeNode = decisionTree;
