@@ -33,7 +33,7 @@ const QuizPage: NextPage = () => {
     const router = useRouter();
     const pathName = usePathname();
 
-    const match = pathName.match(/\/quiz\/([^/]+)\/sologame/);
+    const match = pathName.match(/\/quiz\/([^/]+)\/test/);
     const subject = match ? match[1] : null;
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -82,7 +82,8 @@ const QuizPage: NextPage = () => {
     const handleSelectAnswer = (selectedAnswer: string) => {
         const updatedAnswers = [...userAnswers, selectedAnswer];
         setUserAnswers(updatedAnswers);
-        const { path } = traverseDecisionTree(updatedAnswers);
+
+        const { path } = traverseDecisionTree(updatedAnswers, questions);
         setCurrentDecisionPath(path);
 
         if (currentQuestionIndex === questions.length - 1) {
@@ -93,8 +94,15 @@ const QuizPage: NextPage = () => {
     };
 
     const handlePlayAgain = () => {
-        router.push("/");
+        router.back();
     };
+
+    useEffect(() => {
+        if (quizCompleted) {
+            const { result } = traverseDecisionTree(userAnswers, questions);
+            saveTestResults(result);
+        }
+    }, [quizCompleted]);
 
     const renderQuestion = () => (
         <div className="flex justify-center pb-12">
@@ -148,26 +156,42 @@ const QuizPage: NextPage = () => {
     );
 
     const renderResults = () => {
-        const { result, path } = traverseDecisionTree(userAnswers);
+        const { result, path } = traverseDecisionTree(userAnswers, questions);
 
         return (
             <div className="flex justify-center mt-6">
                 <Card className="flex flex-col mt-12 m-6 h-max lg:p-8 p-4 rounded-2xl border shadow-2xl border-gray-400">
                     <CardHeader>
-                        <CardTitle>Quiz ukończony</CardTitle>
+                        <CardTitle>Test ukończony</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <CardDescription className="text-black">Wynik: {result}</CardDescription>
                         <CardDescription className="text-black">Ścieżka: {path.join(" -> ")}</CardDescription>
-                        <CardDescription className="text-black">Odpowiedzi: {userAnswers.join(", ")}</CardDescription>
+                        <table className="table-auto w-full text-left">
+                            <thead>
+                                <tr>
+                                    <th className="px-4 py-2">Pytanie</th>
+                                    <th className="px-4 py-2">Odpowiedź</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {questions.map((question, index) => (
+                                    <tr key={question.question_id}>
+                                        <td className="border px-4 py-2">{question.question_text}</td>
+                                        <td className="border px-4 py-2">{userAnswers[index]}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </CardContent>
                     <Button className="bg-black text-white" onClick={handlePlayAgain}>
-                        Zagraj jeszcze raz!
+                        Wypełnij test ponownie!
                     </Button>
                 </Card>
             </div>
         );
     };
+
 
     interface DecisionTreeNode {
         question: string;
@@ -296,23 +320,67 @@ const QuizPage: NextPage = () => {
         },
     };
 
-    const traverseDecisionTree = (answers: string[]) => {
+    const traverseDecisionTree = (answers: string[], questions: Question[]) => {
         let node: DecisionTreeNode = decisionTree;
-        const path = [node.question];
+        const path = [...currentDecisionPath];
+
+        // Initialize path if it's empty
+        if (path.length === 0) {
+            path.push(node.question);
+        }
+
         for (let i = 0; i < answers.length; i++) {
+            const question = questions[i];
             const answer = answers[i];
-            if (node.options && node.options[answer]) {
-                node = node.options[answer] as DecisionTreeNode;
-                path.push(node.question);
-                if (typeof node === "string") {
-                    path.push(node); // Add the final result to the path
-                    return { result: node, path }; // Final diagnosis
+
+            // If the final node is reached, stop updating the path
+            if (typeof node === "string") {
+                break;
+            }
+
+            // Ensure we match the question text with the decision tree node
+            if (question.question_text === node.question) {
+                if (node.options && node.options[answer]) {
+                    node = node.options[answer] as DecisionTreeNode;
+                    if (!path.includes(node.question)) {
+                        path.push(node.question);
+                    }
+                    if (typeof node === "string") {
+                        if (!path.includes(node)) {
+                            path.push(node); // Add the final result to the path
+                        }
+                        return { result: node, path }; // Final diagnosis
+                    }
+                } else {
+                    return { result: "Invalid answer path", path }; // If the path is invalid
                 }
-            } else {
-                return { result: "Invalid answer path", path }; // If the path is invalid
             }
         }
+
         return { result: node.question, path }; // Return the last node as the result
+    };
+
+    const saveTestResults = async (result: string) => {
+        let testType = "psychiczne";
+        let illness = result;
+        let depressionScore = null;
+
+        // Save to Supabase
+        const { error } = await supabase
+            .from("completed_tests")
+            .insert([
+                {
+                    user_id: user?.id,
+                    test_type: testType,
+                    illness: illness,
+                    depression_score: depressionScore,
+                    user_answers: userAnswers,
+                },
+            ]);
+
+        if (error) {
+            console.error("Error saving test results:", error);
+        }
     };
 
     return (

@@ -20,7 +20,7 @@ import Head from "next/head";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Quiz_app",
+  title: "Med_quiz",
   description: "Quiz_app with AI's questions!",
 };
 

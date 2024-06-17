@@ -20,10 +20,9 @@ export default function Home() {
   const pathName = usePathname();
 
   const [data, setData] = useState<QuizData[]>([]);
-  const [showFriendList, setShowFriendList] = useState(false);
 
-  const sologame = pathName + "/sologame"; // Replace this with your actual dynamic value
-  const addquestion = pathName + "/addquestion"
+
+  const test = pathName + "/test"; // Replace this with your actual dynamic value
   useUserAuth();
 
   useEffect(() => {
@@ -40,32 +39,22 @@ export default function Home() {
 
   const handleButtonClick = (path: string) => {
     if (path === "/wyzywaj") {
-      // Jeśli kliknięto przycisk "Wyzwij znajomego"
-      setShowFriendList(true);
+
     } else {
       // W przeciwnym razie, przekieruj na podaną ścieżkę
       router.push(path);
     }
   };
 
-  const handleFriendListClose = () => {
-    setShowFriendList(false);
-  };
 
-  const handleBackgroundClick = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    if (event.target === event.currentTarget) {
-      handleFriendListClose();
-    }
-  };
+
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 flex justify-center w-full p-2">
       <div className="flex flex-col">
         <div className="flex flex-col">
           {[
-            { text: "Wypełnij Test!", path: sologame },
+            { text: "Wypełnij Test!", path: test },
             { text: "Wybierz inny Test!", path: "/" },
           ].map((item, index) => (
             <Button

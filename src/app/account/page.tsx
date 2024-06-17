@@ -1,8 +1,8 @@
 "use client";
-import { useUserAuth } from "@/lib/userAuth";
 import { useState, useEffect } from "react";
-import { supabase } from "../../lib/supabase";
-import { useUser } from "../../../hooks/useUser";
+import { useUserAuth } from "@/lib/userAuth";
+import { supabase } from "@/lib/supabase";
+import { useUser } from "@/../hooks/useUser";
 import Button from "@/components/Button";
 
 function UsernameCheck() {
@@ -39,23 +39,18 @@ function UsernameCheck() {
 
   const handleAddUsername = async () => {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("users")
         .update({ username })
         .eq("id", user?.id);
 
-      setIsUsernameMissing(false);
-      setShowModal(false);
-      checkUsername();
       if (error) {
         throw error;
       }
 
-      if (data) {
-        // setIsUsernameMissing(false);
-        // setShowModal(false);
-        // checkUsername();
-      }
+      setIsUsernameMissing(false);
+      setShowModal(false);
+      checkUsername();
     } catch (error) {
       console.error("Error adding username:", error);
     }
@@ -91,17 +86,98 @@ function UsernameCheck() {
   );
 }
 
-export default function Home() {
-  useUserAuth();
+interface CompletedTest {
+  id: number;
+  user_id: string;
+  test_type: string;
+  illness: string | null;
+  depression_score: number | null;
+  user_answers: Record<string, any>;
+  created_at: string;
+}
+
+function CompletedTestsList() {
   const { user } = useUser();
+  const [completedTests, setCompletedTests] = useState<CompletedTest[]>([]);
+  const [expandedTestId, setExpandedTestId] = useState<number | null>(null);
+
   useEffect(() => {
+    if (user) {
+      fetchCompletedTests();
+    }
   }, [user]);
 
+  async function fetchCompletedTests() {
+    try {
+      const { data, error } = await supabase
+        .from("completed_tests")
+        .select("*")
+        .eq("user_id", user?.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setCompletedTests(data);
+    } catch (error) {
+      console.error("Error fetching completed tests:", error);
+    }
+  }
+
+  const toggleExpand = (testId: number) => {
+    setExpandedTestId(expandedTestId === testId ? null : testId);
+  };
 
   return (
-    <div className="flex bg-gray-100 dark:bg-gray-900 lg:p-24 md:p-12 p-8 grid lg:grid-cols-2 grid-cols-1 lg:divide-x">
-
+    <div className="max-w-4xl mx-auto p-8">
+      <h2 className="text-2xl font-bold mb-4">Twoje zakończone testy</h2>
+      {completedTests.map((test) => (
+        <div
+          key={test.id}
+          className="mb-4 p-4 border rounded-lg bg-white shadow-sm"
+          onClick={() => toggleExpand(test.id)}
+        >
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-lg font-semibold">
+                Typ testu: {test.test_type}
+              </p>
+              <p>
+                {test.test_type === "depression"
+                  ? `Wynik: ${test.depression_score}`
+                  : `Choroba: ${test.illness}`}
+              </p>
+              <p>Data: {new Date(test.created_at).toLocaleString()}</p>
+            </div>
+            <button
+              className="text-blue-500"
+              onClick={() => toggleExpand(test.id)}
+            >
+              {expandedTestId === test.id ? "Ukryj" : "Pokaż więcej"}
+            </button>
+          </div>
+          {expandedTestId === test.id && (
+            <div className="mt-4">
+              <h3 className="text-lg font-bold">Odpowiedzi:</h3>
+              <pre className="whitespace-pre-wrap">
+                {JSON.stringify(test.user_answers, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
 
+export default function Home() {
+  useUserAuth();
+  const { user } = useUser();
+
+  return (
+    <div>
+      <UsernameCheck />
+      {user && <CompletedTestsList />}
+    </div>
+  );
+}
