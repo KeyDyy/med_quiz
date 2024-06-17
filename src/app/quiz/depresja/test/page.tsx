@@ -228,7 +228,7 @@ const QuizPage: NextPage = () => {
     );
 
     const saveTestResults = async () => {
-        let testType = "depression";
+        let testType = "depresja";
         let illness = null;
         let depressionScore = totalPoints;
 

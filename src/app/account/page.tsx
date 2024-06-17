@@ -112,7 +112,9 @@ function CompletedTestsList() {
       const { data, error } = await supabase
         .from("completed_tests")
         .select("*")
-        .eq("user_id", user?.id);
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+
 
       if (error) {
         throw error;
@@ -143,7 +145,7 @@ function CompletedTestsList() {
                 Typ testu: {test.test_type}
               </p>
               <p>
-                {test.test_type === "depression"
+                {test.test_type === "depresja"
                   ? `Wynik: ${test.depression_score}`
                   : `Choroba: ${test.illness}`}
               </p>
