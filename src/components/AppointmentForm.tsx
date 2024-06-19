@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'; // Import useRouter from Next.js
 import { toast } from 'react-toastify'
 import { useUser } from "@/../hooks/useUser";
 import 'react-toastify/dist/ReactToastify.css'
+import { useUserAuth } from "@/lib/userAuth";
 
 const AppointmentForm: React.FC = () => {
   const router = useRouter(); // Initialize useRouter hook
@@ -15,7 +16,39 @@ const AppointmentForm: React.FC = () => {
   const [appointmentDate, setAppointmentDate] = useState<string>('')
   const [appointmentTime, setAppointmentTime] = useState<string>('')
   const [availableTimes, setAvailableTimes] = useState<string[]>([])
+  const [doctors, setDoctors] = useState<string[]>([])
   const { user } = useUser();
+  useUserAuth();
+  useEffect(() => {
+    const fetchUserNameAndDoctors = async () => {
+      if (user) {
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('full_name')
+          .eq('id', user.id)
+          .single()
+
+        if (userError) {
+          console.error('Error fetching user data:', userError)
+        } else {
+          setPatientName(userData.full_name)
+        }
+
+        const { data: doctorsData, error: doctorsError } = await supabase
+          .from('users')
+          .select('full_name')
+          .eq('role', 'admin')
+
+        if (doctorsError) {
+          console.error('Error fetching doctors data:', doctorsError)
+        } else {
+          setDoctors(doctorsData.map(doctor => doctor.full_name))
+        }
+      }
+    }
+
+    fetchUserNameAndDoctors()
+  }, [user])
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -51,7 +84,7 @@ const AppointmentForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}:00`).toISOString()
+    const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}:00`)
 
     const { data, error } = await supabase
       .from('appointments')
@@ -65,7 +98,6 @@ const AppointmentForm: React.FC = () => {
     } else {
       console.log('Appointment created:', data)
       // Reset form fields
-      setPatientName('')
       setDoctorName('')
       setAppointmentDate('')
       setAppointmentTime('')
@@ -85,19 +117,23 @@ const AppointmentForm: React.FC = () => {
         <label className="block text-gray-700 text-sm font-bold mb-2">Patient Name</label>
         <input
           type="text"
-          value={user?.id}
-          onChange={(e) => setPatientName(e.target.value)}
+          value={patientName}
+          readOnly
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
         />
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">Doctor Name</label>
-        <input
-          type="text"
+        <select
           value={doctorName}
           onChange={(e) => setDoctorName(e.target.value)}
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
+        >
+          <option value="">Select a doctor</option>
+          {doctors.map(doctor => (
+            <option key={doctor} value={doctor}>{doctor}</option>
+          ))}
+        </select>
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">Appointment Date</label>

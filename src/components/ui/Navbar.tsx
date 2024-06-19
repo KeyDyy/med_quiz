@@ -18,11 +18,11 @@ function isScreenSizeGreaterThan1000() {
 const Navbar = () => {
   const { user } = useUser();
   const [username, setUsername] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const authModal = useAuthModal();
   const supabaseClient = useSupabaseClient();
-
 
   const findUser = async () => {
     try {
@@ -31,7 +31,7 @@ const Navbar = () => {
       if (user) {
         const { data, error } = await supabase
           .from("users")
-          .select("id, username")
+          .select("id, username, role")
           .eq("id", user.id)
           .single();
 
@@ -41,6 +41,7 @@ const Navbar = () => {
 
         if (data) {
           setUsername(data.username || null);
+          setRole(data.role || null);
         }
       } else {
         // Throw an error if the user object is not available.
@@ -67,7 +68,6 @@ const Navbar = () => {
     }
   };
 
-
   return (
     <div className="sticky inset-x-0 top-0 bg-white dark:bg-gray-950 z-[20] h-fit border-b border-zinc-300">
       <div className="flex items-center justify-between py-2 px-8 mx-auto max-w-7xl">
@@ -80,11 +80,27 @@ const Navbar = () => {
 
         {user ? (
           <div className="flex gap-x-4 items-center">
+            {role === 'admin' ? (
+              <Button
+                onClick={() => router.push("/appointmentList")}
+                className="bg-white rounded-lg border-2 border-b-4 border-r-4 border-black px-2 py-1 text-xl font-bold transition-all hover:-translate-y-[2px] md:block dark:border-white"
+              >
+                Lista_Wizyt
+              </Button>
+            ) : (
+              <Button
+                onClick={() => router.push("/appointment")}
+                className="bg-white rounded-lg border-2 border-b-4 border-r-4 border-black px-2 py-1 text-xl font-bold transition-all hover:-translate-y-[2px] md:block dark:border-white"
+              >
+                Umów_Wizytę
+              </Button>
+            )}
             {isScreenSizeGreaterThan1000() && (
               <div className="email">
                 {loading ? "Loading..." : username || user.email}
               </div>
             )}
+
             <Button
               onClick={() => router.push("/account")}
               className="bg-white"
@@ -97,8 +113,6 @@ const Navbar = () => {
             >
               Wyloguj
             </Button>
-
-
           </div>
         ) : (
           <button

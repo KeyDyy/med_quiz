@@ -9,7 +9,6 @@ import { useEffect } from "react";
 import { useUserAuth } from "@/lib/userAuth";
 
 
-
 interface QuizData {
   logo: string;
   title: string;
